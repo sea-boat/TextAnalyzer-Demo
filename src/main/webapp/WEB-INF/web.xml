@@ -1,0 +1,58 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+	<display-name>Archetype Created Web Application</display-name>
+
+	<servlet>
+		<servlet-name>hotword</servlet-name>
+		<servlet-class>com.seaboat.analyzer.HotWordServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>similarity</servlet-name>
+		<servlet-class>com.seaboat.analyzer.SimilarityServlet</servlet-class>
+		<init-param>
+			<param-name>word2vec_path</param-name>
+			<param-value>D:\\chinese_corpus\\Google_word2vec_zhwiki1710_300d.bin</param-value>
+		</init-param>
+	</servlet>
+	<servlet>
+		<servlet-name>address</servlet-name>
+		<servlet-class>com.seaboat.analyzer.AddressServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>predict</servlet-name>
+		<servlet-class>com.seaboat.analyzer.PredictServlet</servlet-class>
+		<init-param>
+			<param-name>model_file</param-name>
+			<param-value>D:\kuaipan\workspace\yixun-workspace\TextAnalyzer\model\svm-model</param-value>
+		</init-param>
+		<init-param>
+			<param-name>vector_file</param-name>
+			<param-value>D:\kuaipan\workspace\yixun-workspace\TextAnalyzer\model\vector</param-value>
+		</init-param>
+		<init-param>
+			<param-name>tfidf_file</param-name>
+			<param-value>D:\kuaipan\workspace\yixun-workspace\TextAnalyzer\model\tfidf</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>hotword</servlet-name>
+		<url-pattern>/hotword</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>similarity</servlet-name>
+		<url-pattern>/similarity</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>address</servlet-name>
+		<url-pattern>/address</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>predict</servlet-name>
+		<url-pattern>/predict</url-pattern>
+	</servlet-mapping>
+
+</web-app>

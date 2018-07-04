@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>TextAnalyzer 演示</title>
+<link rel="stylesheet" href="js/layui/css/layui.css">
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+	<div class="layui-layout layui-layout-admin" id="main">
+		<div class="layui-header">
+			<div class="layui-logo">
+				<img src="img/logo.png" style="width: 50px;" /> &nbsp;&nbsp;
+				TextAnalyzer 演示
+			</div>
+			<div class="admin-header">
+				<ul class="layui-nav" lay-filter="user">
+					<li class="layui-nav-item"><a href="javascript:void(0);"><i
+							class="layui-icon">&#xe612;</i>管理人员</a>
+						<dl class="layui-nav-child">
+							<dd>
+								<a href="javascript:void(0);">修改密码</a>
+							</dd>
+							<dd>
+								<a href="javascript:void(0);">退出</a>
+							</dd>
+						</dl></li>
+				</ul>
+			</div>
+		</div>
+		<div class="layui-side layui-bg-black">
+			<div class="layui-side-scroll">
+				<ul class="layui-nav layui-nav-tree" lay-filter="leftNav">
+					<li class="layui-nav-item"><a href="javascript:;"
+						lay-id="knowledgeBase">热词提取演示</a></li>
+					<li class="layui-nav-item"><a href="javascript:;"
+						lay-id="word2vecBase">相似性演示</a></li>
+					<li class="layui-nav-item"><a href="javascript:;"
+						lay-id="addressExtractBase">地址提取演示</a></li>
+					<li class="layui-nav-item"><a href="javascript:;"
+						lay-id="textClassifyBase">预测文本分类演示</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="layui-body">
+			<div class="layui-tab layui-tab-brief" lay-allowClose="true"
+				lay-filter="tab">
+				<ul class="layui-tab-title">
+					<li class="layui-this" lay-id="overview"></li>
+				</ul>
+				<div class="layui-tab-content fade-in-right">
+					<div class="layui-tab-item layui-show"></div>
+				</div>
+			</div>
+		</div>
+		<div class="layui-footer">
+			<!-- 底部固定区域 -->
+		</div>
+	</div>
+	<template id="changePass">
+	<form class="layui-form" action="">
+		<div class="layui-form-item">
+			<label class="layui-form-label">原密码:</label>
+			<div class="layui-input-block">
+				<input type="password" name="oldPass" required lay-verify="required"
+					placeholder="请输入原密码" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">新密码:</label>
+			<div class="layui-input-block">
+				<input type="password" name="newPass" required lay-verify="required"
+					placeholder="请输入新密码" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">重复新密码:</label>
+			<div class="layui-input-block">
+				<input type="password" name="newPassAgain" required
+					lay-verify="required" placeholder="请重复新密码" autocomplete="off"
+					class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item"></div>
+	</form>
+	</template>
+
+	<template id="knowledgeBaseContent">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel">
+				<div class="panel-heading">
+					<form action="" class="layui-form" id="addKnowledgeBaseForm">
+						<div class="layui-form-item layui-form-text">
+							<fieldset class="layui-elem-field layui-field-title"
+								style="margin-top: 20px;">
+								<legend>热词提取演示</legend>
+							</fieldset>
+							<textarea rows="4" placeholder="请输入内容" class="layui-textarea"
+								id="myText">
+申诉人于2014年12月14日在虎门镇南栅五区千惠百货1楼的中国联通千惠专营店以分期付款的形式购买了一部苹果5S的手机，价值4198元，商家向申诉人称交500元可以办理分期付款，申诉人反映交了500元的首付，并持有收据，收据上写明是首付500元预存机，申诉人交费后商家没有为申诉人提供手机，商家还要求申诉人再交1000元才可以办理分期付款，申诉人向商家表示因个人因素不能交1000元，申诉人要求商家提供手机或者退换500元遭商家拒绝，现申诉人要求商家提供手机或者退还500元，请协调。
+</textarea>
+						</div>
+						<div class="layui-form-item">
+							<button class="layui-btn" lay-submit="" lay-filter="extract_btn">开始提取</button>
+						</div>
+					</form>
+					<div class="row fade-in-right" id="showText"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<table class="layui-hide" id="showText"></table>
+	</template>
+	<template id="word2vecBaseContent">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel">
+				<div class="panel-heading">
+					<form action="" class="layui-form" id="word2vecBaseForm">
+						<div class="layui-form-item layui-form-text">
+							<fieldset class="layui-elem-field layui-field-title"
+								style="margin-top: 20px;">
+								<legend>词语相似性</legend>
+							</fieldset>
+							<div class="layui-form-item">
+								<div class="layui-inline">
+									<label class="layui-form-label">单词1</label>
+									<div class="layui-input-inline">
+										<input type="tel" name="word1" lay-verify="required"
+											autocomplete="off" class="layui-input" value="猫">
+									</div>
+								</div>
+								<div class="layui-inline">
+									<label class="layui-form-label">单词2</label>
+									<div class="layui-input-inline">
+										<input type="text" name="word2" lay-verify="required"
+											autocomplete="off" class="layui-input" value="狗">
+									</div>
+								</div>
+								<div class="layui-inline">
+									<button class="layui-btn" lay-submit=""
+										lay-filter="word_sim_btn">开始计算</button>
+								</div>
+								<div class="layui-inline">
+									<div class="layui-form-mid layui-word-aux" id="wordsim">相似性为：</div>
+								</div>
+							</div>
+							<fieldset class="layui-elem-field layui-field-title"
+								style="margin-top: 20px;">
+								<legend>句子相似性</legend>
+							</fieldset>
+							<div class="layui-form-item">
+								<label class="layui-form-label">句子1</label>
+								<div class="layui-input-block">
+									<input type="tel" name="sentence1" lay-verify="required"
+										autocomplete="off" class="layui-input"
+										value="苏州有多条公路正在施工，造成局部地区汽车行驶非常缓慢。">
+								</div>
+							</div>
+							<div class="layui-form-item">
+								<label class="layui-form-label">句子2</label>
+								<div class="layui-input-block">
+									<input type="text" name="sentence2" lay-verify="required"
+										autocomplete="off" class="layui-input"
+										value="苏州最近有多条公路在施工，导致部分地区交通拥堵，汽车难以通行。">
+								</div>
+							</div>
+							<div class="layui-form-item">
+								<div class="layui-inline">
+									<button class="layui-btn" lay-submit=""
+										lay-filter="sentence_sim_btn">开始计算</button>
+								</div>
+								<div class="layui-inline">
+									<div class="layui-form-mid layui-word-aux" id="sentencesim">相似性为：</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	</template>
+	<template id="addressExtractBaseContent">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel">
+				<div class="panel-heading">
+					<form action="" class="layui-form" id="addressExtractBaseForm">
+						<div class="layui-form-item layui-form-text">
+							<fieldset class="layui-elem-field layui-field-title"
+								style="margin-top: 20px;">
+								<legend>地址提取演示</legend>
+							</fieldset>
+							<textarea rows="4" placeholder="请输入内容" class="layui-textarea"
+								id="myAddressText">
+申诉人于2014年12月14日在虎门镇南栅五区千惠百货1楼的中国联通千惠专营店以分期付款的形式购买了一部苹果5S的手机，价值4198元，商家向申诉人称交500元可以办理分期付款，申诉人反映交了500元的首付，并持有收据，收据上写明是首付500元预存机，申诉人交费后商家没有为申诉人提供手机，商家还要求申诉人再交1000元才可以办理分期付款，申诉人向商家表示因个人因素不能交1000元，申诉人要求商家提供手机或者退换500元遭商家拒绝，现申诉人要求商家提供手机或者退还500元，请协调。
+</textarea>
+						</div>
+						<div class="layui-form-item">
+							<button class="layui-btn" lay-submit=""
+								lay-filter="address_extract_btn">开始提取</button>
+						</div>
+					</form>
+					<div class="row fade-in-right" id="showAddressText"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<table class="layui-hide" id="showAddressText"></table>
+	</template>
+
+	<template id="textClassifyBaseContent">
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel">
+				<div class="panel-heading">
+					<form action="" class="layui-form" id="textClassifyBaseForm">
+						<div class="layui-form-item layui-form-text">
+							<fieldset class="layui-elem-field layui-field-title"
+								style="margin-top: 20px;">
+								<legend>训练样本</legend>
+							</fieldset>
+							<textarea rows="5" placeholder="请输入内容" class="layui-textarea"
+								id="myTrainingText">
+0|长期向寒溪河投放带有硝酸，硫酸等没有经过处理的废水，要求市长亲自处理并且答复。
+1|咨询订火车票事宜，已提供铁路局热线
+2|咨询通过贷款购买一台手机，商家要求付手续费，咨询人不同意 ，建议与商家协商或咨询法律咨询热线。
+1|咨询东莞市莞城区西正路占道停车收费服务价格标准。
+1|咨询东莞市莞城区西正路占道停车服务收费标准。
+3|投诉人投诉乐视和京东，建议其找到两家公司的所在地，再拨打当地工商局电话进行咨询
+1|咨询806路公交车收费标准。
+1|咨询机动车年票通行费是否要缴交。
+1|咨询长安长青路地段停车收费
+3|投诉人咨询百货店是否需要年检。
+3|咨询戒指送商家抛光，商家没有按要求抛光，商家同意维修，咨询人要求赔偿损失，建议与商家协商。
+3|咨询商品合格证悬挂是否合格，建议其咨询质检局。
+3|咨询购买的电视机出现质量问题，商家检测说是人为因素造成的，咨询人不同意，建议通过第三方检测。
+4|咨询人咨询腾讯空间发邮件，咨询人填好个人资料后，网站弹出页面（内容说咨询人签订协议，必须付款拿取礼品，否则会产生法律责任），建议其咨询法律专线。
+8|咨询公司拖欠工资该怎么处理。已经转人力资源局
+0|需要提供一份关于幼儿园饮用水菌落数量检测，水质量全面报告，以及检测价格
+2|2014年12月16日下午六七点在清溪中心市场沿公安局方向300米到400米的小米之家的手机店买小米手机，可是最后未经买家的同意给你莱米的手机，买家以与店家沟通，想要换回小米手机
+3|举报人于2014年12月17日举报位于东莞市凤岗镇雁田南山工业城C6栋4楼天宇五金厂，生产假冒卡西欧牌子的手表，请查处。询问举报人是否需要电话回复，举报人不需要电话回复。
+5|投诉人刘生，投诉于2014年11月26日在东莞市寮步镇香市路国际汽车城东侧广汽本田杜生（电话：18800000000）购买凌派汽车，与其签定合同协议涉及订金5000元，承诺当贷款不成功可退还其定金，但当贷款不成功，商家却不退还其5000元定金，需要投诉。（投诉人要求电话回复）
+4|朱先生向某单位提出诉讼，咨询诉讼保全所需抵押的是实物还是证件。朱先生电话：13500000000
+6|民办舞蹈培训机构中途退学，要求退费。处理方法：由于属地管理原则，所以需要交由当地教办协调处理。
+2|咨询购买一台手机，使用三个月后出现黑屏现象，商家检测后称是人为因素造成，建议提供相关举证。
+5|韩先生于2014年12月19日查询他本人车辆，车牌号码为（粤S9653T）于2003年购买的2.4l排量的长城皮卡，是否符合报废补贴车辆行列。<br />韩先生电话号码：15300000000
+7|非本市户口职工与单位终止劳动关系的提取
+7|公司没有给员工做工伤认定，引导咨询回社保局前台投诉公司
+0|位于东莞市桥头镇东江村福源南路附近的机械厂和无牌照的家俬厂排放刺激性的气体及灰尘，桥头环保分局已于三个月前受理，处理结果是责令以上两间工厂于2014年12月10日进行整改，但是目前已超过整改日期六天，工厂还是照常生产运营，群众希望环保部门尽快要求工厂整改。
+7|劳工咨询合同辞工申请，建议到当地人力资源服务站处理。
+5|咨询在东莞购买一台本田汽车，本田公司联系车主因该款汽车的安全气囊存在安全问题，要回收该汽车维修，日期是2015年，咨询人觉得回收日期不能接受，建议与商家协商。
+7|非本市户口职工与单位终止劳动关系的提取指南
+7|工作调离本市、户口迁出本市、出境定居的提取指南
+12|投诉万江人民医院没人上班，建议向卫计部门反映，已转接。
+7|本市户口职工与单位终止劳动关系并领取《失业证》的提取指南
+8|市民反映在12月9号左右，自营的草莓园在东莞市长安镇锦厦菜地锦绣路，大约有半亩地的草莓苗遭别人下农药而毒死，市民已经跟当地公安备案，当地公安要求市民跟农业局反映，向农业局确认草莓苗是因哪种农药种类而死的。
+8|咨询12345热线咨询范围
+5|投诉人陈生投诉在2014年9月7日位于南城莞太路白马路段（长安汽车东莞华跃南城店）订购一辆长安suv cs-75的车，签订合同涉及的订金10000元以及三个月能保证有车，当时的售货员余生（电话：15300000000）保证在三个月内能有车，但是三个月过了，车子还没到，一直没有结果，投诉人要求店铺赔偿，并要求电话回复。
+7|偿还本市住房公积金贷款提取指南
+0|石龙中学隔壁的河涌严重污染，石龙镇出具报纸8月会处理好，可是未曾处理好，影响学生，打风下雨时环境特别味道刺鼻，姓名：赵小姐18600000000。学校接送，学校门口是马路，由于家长停车时乱扔垃圾，因此学校已围起，阻碍了家长停车，家长只能停在不安全的地方，学校食餐公告多样化，现实伙食很差。
+8|石排镇向西石崇工业区世博彩印有限公司 厂房拖欠工人工资已有一段时间一直得不到处理，投诉人请求劳动局帮忙尽快协助处理(1个小时前,即早上8:51已来电登记了，现催赶紧办理)
+7|本市户口职工与单位终止劳动关系并领取《失业证》的提取
+12|市民姚先生投诉，12月19日其在石龙社区卫生服务中心办理挂号手续，该中心服务人员告知从早上08:00到致电时的09:24,市的网上挂号系统处于故障状态，无法进行挂号操作，姚先生还投诉最近也发生过类似的故障。请求处理。
+10|购买、建造、翻建和大修自住住房的提取指南
+7|非本市户口职工与单位终止劳动关系的提取指南
+1|虎门富民时装城周边路段停车6天收费90多元 问是否合理 系统查到应该收费150元，投诉人表示无异议
+7|非本市户口职工与单位终止劳动关系的提取指南
+1|市民咨询用士兵证坐公交需不需要收费
+5|投诉卖车商家不保修，投诉人在保修期内曾经不在商家指定的保养点保养。
+2|投诉通过积分获得的手机无法开机，商家提供换机售后服务，投诉人不满意售后服务，建议其自行协商。
+8|各镇街人力资源分局及人力资源服务站联系电话的咨询
+8|市工商局其他咨询；市工商局其他咨询
+2|投诉电信活动摆摊卖手机，手机出现质量问题，商家地址是流动的，建议其咨询城市综合执法局。
+1|反映车牌号码为粤S97715的217路公交从石龙金沙湾至东莞汽车东站收取25元，但在桔洲第三工业区时被乘务员驱赶下车，转乘其他车辆，且不给相关的票据（投诉人意见非常大，情绪激动）建议政府部门加强相关的管理
+2|投诉电脑问题，投诉人送商家维修，经过20多天，商家以电脑有人为损坏因素为由，不予免费保修，投诉人不认可商家提供的结果。
+8|车辆过户费是否属于政府定价问题。
+1|丁先生反映在长安长青南路停车2小时内收费15元 问是否合理。
+5|投诉汽车问题，投诉人反映在鸿众4S点检查车，检测结果显示车的后悬架出现变形，要求店家出具检测报告遭拒绝，建议查询店家的详细地址。
+8|咨询塘厦镇烟草分局投诉电话，投诉店家销售假烟。
+8|1991年的住宅地，1992年建成。国土要求规划局盖章，规划局回复从来不需要盖章。不盖章国土不予办理。也向电台反映过。<br />万江区大汾社区八甲坊十巷5号，求回复。
+2|投诉购买苹果5手机过保修期两年，建议找到苹果手机权威售后服务点出具序列号过期证明，再来咨询
+7|异地就医报销，韶关的参保可不可以在东莞异地就医，能不能当场报销，异地就医怎样使群众方便。引导市民咨询回当地社保分局。市民觉得这个回复不满意，建议话务员服务态度可以改善。
+7|非本市户口职工与单位终止劳动关系的提取指南
+7|本市户口职工与单位终止劳动关系并领取《失业证》的提取
+7|偿还本市住房公积金贷款提取指南
+7|咨询深圳市住房公积金管理中心转移业务
+7|偿还本市住房公积金贷款提取
+12|建议转诊的诊疗费根据情况收取，有部门情况是没有诊疗直接写转诊单，但也收取诊疗费
+8|投诉人于2014年12月4日通过南城区先锋路宏海物流园3号-5号的赛宇物流有限公司（物流公司联系电话：86229868）寄送一套沙发到四川老家，送到四川，当地物流派送点拒绝让投诉人的授权人检查货物后才签收，已经交付260元运费并没有签订保价协议，现要求当地物流派送点让授权人检查货物后签收，请协调。（投诉人致电物流协会，物流协会不受理。）
+7|本市户口职工与单位终止劳动关系并领取《失业证》的提取指南
+10|偿还商业购房贷款提取指南 
+1|咨询通过网上购买火车票，现已退火车票，但退票款还没有收到，建议向铁路局反映。
+4|来电者今年2月份开始在厚街镇环冈社区一工厂上班，7月份工厂老板跑路，拖欠他3-6月份的工资，来电者向厚街镇人力资源分局申请劳动仲裁之后，工厂房东变卖机器设备。建议等待仲裁判决书出来之后再跟房东协商或者向法院申请帮助。
+8|该投诉人投诉东莞市常平镇朗贝管理区第三队队长涉嫌贪污，该管理区集体搞厂房扩建，原计划建到6层，没投标，原先第三队队长给村民说是2000万，后来建到4层后国土局过来阻止停建，所以价格就变到1700万。但装修后，说要改造，又增加了500万，一个月后，又说要增加100万，即扩建工厂总用金额为2300万。投诉人声称改队长夸大金额取差价，投诉人称已反映多个部门，但部门称不是党员抓不了。
+2|咨询11月在电信营业厅购买一台手机，电路板出现质量问题，送回电信售后维修，至今未有答复手机修好的日期，建议与商家协商。
+8|市工商局其他咨询；市工商局其他咨询
+2|手机购买时间已超15天，出现故障送修20天没有结果，是否可以要求换机。
+2|网购一部手机，怀疑是假冒品，要求退换。
+2|投诉购买万米手机的不是小米手机，投诉人投诉塘厦镇花园街42栋101——102号的小米专卖店（即花园街东莞银行对面）购买了一部万米手机，店家标示价钱不一，后投诉人发现手机不是小米手机，投诉人情况比较紧急，建议其咨询塘厦分局。（投诉人当天咨询来电号码：18300000000）。
+10|购买、建造、翻建和大修自住住房的提取指南  偿还商业购房贷款提取
+7|转移-市外转移；租住本市住房提取指南
+7|偿还本市住房公积金贷款提取指南
+10|梁润媚反映：在洪梅镇洪屋涡有块30年使用权的土地，有土地证，但政府规划没有出入通道与排水。村书记已批准那块地的相邻土地建楼房，现在无法出入与排水。已向国土局、村委会、市政府、城监、城建等等多个部门反映都不受理。要求相关部门回访解决办法。
+7|来电市民反映非机顶盒使用户近期无法正常收看电视节目，鉴于本人是低保户，仅靠低保金生活，未有经济能力负担机顶盒及其电视收费，希望政府能出台相关优惠政策保障低保用户的基本需求（主要是新闻电视节目，便于了解国家时事新闻）。（注：用户地址：石龙镇风炉街7号，要求保密来电者个人信息）
+5|投诉车税问题，投诉人反映在福建买车，并买保险交了车全税，入东莞的牌，年审时还要再交车全税。
+3|地址：东莞市南城区下手村同创市场（菜市场里面）  有商家把食盐价格提到2元，包装上写着统一售价是1.5元，该包装为广东省盐业集团有限公司。黎先生1500000000
+0|胡先生发现每天大概凌晨6:00-7:00这个时间段该工厂都会直接把工业废水排放到附近的小河里面，小河里面的水有时候呈白色有时候呈蓝色并且发出一股很难闻的气味影响附近公众环境。对此提出投诉希望相关部门作出相应的处理，改善附近环境。
+7|非本市户口职工与单位终止劳动关系的提取指南
+7|出具《住房公积金个人缴存情况证明》或《住房公积金个人缴存、贷款、提取综合情况证明》
+1|301公交乱收费，之前已投诉已发资料过来，问收到没？已回复收到票据
+11|经营者纠纷：电脑洗床启动板坏了，请维修公司进行维修，维修一年都没修好，要求退款，维修公司只愿意退一部分款。现咨询工商局是否可以加入协调。
+10|购买、建造、翻建和大修自住住房的提取
+2|投诉中国电信电话销售的手机为网络手机，投诉人寻找到地址再来投诉
+8|咨询投诉驾校扣押身份证，建议向公安局反映。
+7|非本市户口职工与单位终止劳动关系的提取指南
+10|购买、建造、翻建和大修自住住房的提取指南；购买、建造、翻建和大修自住住房的提取指南
+8|咨询查处酒吧部门，建议向城市综合执法局反映，对方不肯，要求回复向上级反映结果。
+1|咨询停车收费服务许可证办理
+0|咨询东江河边测速监控的监控范围是多少米范围内测速。
+0|举报东莞市道滘镇九曲商贸城2-3楼无证经营，但举报人无法提供具体生产的为何物。但有产生挥发性气味。建议查清楚再咨询。
+4|商家投诉订货追讨尾款问题，建议其咨询法律咨询专线，或咨询派出所。
+5|投诉人于2012年12月14日在东莞寮镇购买了一辆汽车，因为投诉人汽车已过国家规定的三包期，故厂家不理赔。已向投诉人进行解析。
+7|市公积金管理中心其他咨询--转接
+6|有2年半的学籍，学校放映说可以看一下2015年的政策有没有规定2年半学籍算不算3年学籍
+5|汽车维修店员工不小心撞坏车主的车，建议其先联系交警部门出示一份责任鉴定书，再向我们投诉。
+9|反映东莞养和医院药物收费偏高。地址：东莞市莞城区东纵大道鸿富大厦附近（可调资料）
+7|市公积金管理中心其他咨询--呼叫转移
+</textarea>
+
+							<fieldset class="layui-elem-field layui-field-title"
+								style="margin-top: 20px;">
+								<legend>测试样本</legend>
+							</fieldset>
+							<textarea rows="1" placeholder="请输入内容" class="layui-textarea"
+								id="myTestText">
+咨询在东莞购买一台本田汽车，本田公司联系车主因该款汽车的安全气囊存在安全问题，要回收该汽车维修，日期是2015年，咨询人觉得回收日期不能接受，建议与商家协商。
+</textarea>
+						</div>
+						<div class="layui-form-item">
+							<button class="layui-btn" lay-submit=""
+								lay-filter="text_predict_btn">开始预测</button>
+						</div>
+					</form>
+					<div class="row fade-in-right" id="showAddressText"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<table class="layui-hide" id="showPredictText"></table>
+	</template>
+</body>
+<script src="js/jquery-3.1.1.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/layui/layui.js"></script>
+<script src="js/echarts.min.js"></script>
+<script src="js/masonry-docs.min.js" charset="utf-8"></script>
+<script src="js/src/common/main.js" charset="utf-8"></script>
+</html>
